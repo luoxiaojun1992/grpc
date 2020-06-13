@@ -164,6 +164,13 @@ class ServiceGenerator implements CodeGeneratorInterface
             ->append("class $serviceName extends \\SwFwLess\\services\\GrpcUnaryService implements \\App\services\\$interfaceName")
             ->append('{')
             ->incrIndentation()->newline();
+        $this->_createRequestMessageMappingMethod(
+            $service->getMethods(),
+            $buffer,
+            $service,
+            $file
+        );
+        $buffer->newline();
         foreach ($service->getMethods() as $method) {
             $this->_createRpcMethods($buffer, $service, $file, $method);
         }
@@ -217,6 +224,38 @@ class ServiceGenerator implements CodeGeneratorInterface
         $name = array_pop($parts);
         $namespace = implode("\\", $parts);
         return [$name, $namespace];
+    }
+
+    /**
+     * @param MethodDescriptor[] $methods
+     * @param CodeStringBuffer $buffer
+     * @param ServiceDescriptor $service
+     * @param FileDescriptor $file
+     */
+    private function _createRequestMessageMappingMethod(
+        array $methods,
+        CodeStringBuffer $buffer,
+        ServiceDescriptor $service,
+        FileDescriptor $file)
+    {
+        $buffer->append('public function requestMessageClass($method)');
+        $buffer->append('{');
+        $buffer->incrIndentation();
+        $buffer->append('$requestMessageClasses = [');
+        $buffer->incrIndentation();
+
+        foreach ($methods as $method) {
+            $methodName = implode('', array_map('ucfirst', explode("_", $method->getName())));
+            $requestClass = $method->getInputType()->getClass();
+            $buffer->append('\'' . $methodName . '\' => ' . $requestClass . '::class,');
+        }
+
+        $buffer->decrIndentation();
+        $buffer->append('];');
+        $buffer->newline();
+        $buffer->append('return $requestMessageClasses[$method] ?? null;');
+        $buffer->decrIndentation();
+        $buffer->append('}');
     }
 
     private function _createRpcMethods(CodeStringBuffer $buffer,
