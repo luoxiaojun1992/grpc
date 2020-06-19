@@ -247,7 +247,7 @@ class ServiceGenerator implements CodeGeneratorInterface
         foreach ($methods as $method) {
             $methodName = implode('', array_map('ucfirst', explode("_", $method->getName())));
             $requestClass = $method->getInputType()->getClass();
-            $buffer->append('\'' . $methodName . '\' => ' . $requestClass . '::class,');
+            $buffer->append('\'' . $methodName . '\' => \\' . $requestClass . '::class,');
         }
 
         $buffer->decrIndentation();
