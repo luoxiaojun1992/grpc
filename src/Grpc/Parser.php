@@ -1,7 +1,7 @@
 <?php
 /*
   +----------------------------------------------------------------------+
-  | Swoole-Etcd-Client                                                   |
+  | Swoole-gRPC                                                   |
   +----------------------------------------------------------------------+
   | This source file is subject to version 2.0 of the Apache license,    |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -57,7 +57,7 @@ class Parser
             $value = self::unpack($value);
         }
         if (is_array($deserialize)) {
-            list($className, $deserializeFunc) = $deserialize;
+            [$className, $deserializeFunc] = $deserialize;
             /** @var $obj \Google\Protobuf\Internal\Message */
             $obj = new $className();
             if ($deserializeFunc && method_exists($obj, $deserializeFunc)) {
@@ -73,24 +73,24 @@ class Parser
     }
 
     /**
-     * @param \swoole_http2_response|null $response
+     * @param \Swoole\Http2\Response|null $response
      * @param $deserialize
-     * @return Message[]|\Grpc\StringifyAble[]|\swoole_http2_response[]
+     * @return Message[]|\Grpc\StringifyAble[]|\Swoole\Http2\Response[]
      */
     public static function parseToResultArray($response, $deserialize): array
     {
         if (!$response) {
             return ['No response', GRPC_ERROR_NO_RESPONSE, $response];
-        } elseif ($response->statusCode !== 200) {
+        } elseif ($response->statusCode !== 0 && (($response->statusCode / 100) % 10) !== 2) {
             return ['Http status Error', $response->errCode ?: $response->statusCode, $response];
         } else {
-            $grpc_status = (int)($response->headers['grpc-status'] ?? 0);
+            $grpc_status = (int) ($response->headers['grpc-status'] ?? 0);
             if ($grpc_status !== 0) {
                 return [$response->headers['grpc-message'] ?? 'Unknown error', $grpc_status, $response];
             }
             $data = $response->data;
             $reply = self::deserializeMessage($deserialize, $data);
-            $status = (int)($response->headers['grpc-status'] ?? 0 ?: 0);
+            $status = (int) (($response->headers['grpc-status'] ?? 0) ?: 0);
             return [$reply, $status, $response];
         }
     }

@@ -1,7 +1,7 @@
 <?php
 /*
   +----------------------------------------------------------------------+
-  | Swoole-Etcd-Client                                                   |
+  | Swoole-gRPC                                                   |
   +----------------------------------------------------------------------+
   | This source file is subject to version 2.0 of the Apache license,    |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -41,15 +41,17 @@ class BaseStub extends VirtualClient
         array $metadata = [],
         array $options = []
     ) {
-        $request = new \swoole_http2_request;
+        $request = new Request;
         $request->method = 'POST';
         $request->path = $method;
         $request->data = Parser::serializeMessage($argument);
-	$request->headers = [
-	    'content-type' => 'application/grpc',
-	    'te' => 'trailers',
-	];
 
+        $options['headers']['content-type'] = 'application/grpc';
+        $options['headers']['te'] = 'trailers';
+
+        if (isset($options['headers'])) {
+            $request->headers = $options['headers'];
+        }
         $streamId = $this->send($request);
 
         return Parser::parseToResultArray(

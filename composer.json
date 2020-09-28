@@ -22,7 +22,7 @@
     }
   ],
   "support": {
-    "issues": "https://github.com/swoole/etcd-client/issues"
+    "issues": "https://github.com/swoole/grpc/issues"
   },
   "require": {
     "php": ">=7.1",
@@ -36,12 +36,6 @@
     "files": [
       "src/include/functions.php"
     ]
-  },
-  "repositories": {
-    "packagist": {
-      "type": "composer",
-      "url": "https://packagist.laravel-china.org/"
-    }
   },
   "config": {
     "optimize-autoloader": true,

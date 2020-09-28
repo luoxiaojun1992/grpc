@@ -8,13 +8,11 @@ require __DIR__ . '/../../vendor/autoload.php';
 $name = !empty($argv[1]) ? $argv[1] : 'Swoole';
 
 Swoole\Coroutine::create(function () use ($name) {
-    $greeterClient = new GreeterClient('127.0.0.1:50051');
+    $greeterClient = new GreeterClient('unix:///tmp/grpc.sock');
     $request = new HelloRequest();
     $request->setName($name);
     [$reply] = $greeterClient->SayHello($request);
     $message = $reply->getMessage();
-    $data = $reply->getData();
     echo "{$message}\n";
-    echo "{$data}\n";
     $greeterClient->close();
 });
