@@ -46,9 +46,6 @@ class BaseStub extends VirtualClient
         $request->path = $method;
         $request->data = Parser::serializeMessage($argument);
 
-        $options['headers']['content-type'] = 'application/grpc';
-        $options['headers']['te'] = 'trailers';
-
         if (isset($options['headers'])) {
             $request->headers = $options['headers'];
         }
