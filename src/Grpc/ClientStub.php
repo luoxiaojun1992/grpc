@@ -11,6 +11,7 @@ abstract class ClientStub
     {
         $client = new $this->grpc_client($this->endpoint);
         list($reply, $status) = call_user_func_array([$client, $name], $arguments);
+        $client->close();
 
         if (!$status) {
             return $reply;
